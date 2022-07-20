@@ -1,57 +1,68 @@
 <template>
-  <div class="blockBg" v-if="modalState == true">
-    <div class="whiteBg">
-      <button @click="modalState = false">X</button>
-      <h4>상세페이지</h4>
-      <p>상세페이지 내용</p>
-    </div>
-  </div>
-
+  <transition name="fade">
+    <Modal @closeModal="modalState = false" :dummydata="dummydata" :modalState="modalState" :titleNum="titleNum" />
+  </transition>
   <div class="menu">
     <a v-for="menuName in menuNames" :key="menuName">{{ menuName }}</a>
   </div>
-  <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
-  <!-- <div>
-    <h4>{{ products[0] }} 원룸</h4>
-    <p>50 만원</p>
-    <button @Click="increase()">허위매물신고</button>
-    <span>신고횟수 : {{ reportCount[0] }}</span>
-  </div>
-  <div>
-    <h4>{{ products[1] }} 원룸</h4>
-    <p>70 만원</p>
-    <button @Click="increase()">허위매물신고</button>
-    <span>신고횟수 : {{ reportCount[1] }}</span>
-  </div>
-  <div>
-    <h4>{{ products[2] }} 원룸</h4>
-    <p>70 만원</p>
-    <button @Click="increase()">허위매물신고</button>
-    <span>신고횟수 : {{ reportCount[2] }}</span>
-  </div> -->
-  <div v-for="(some, i) in products" :key="i">
-    <img class="roomImg" :src="require(`./assets/room${i}.jpg`)" />
-    <h4 @click="modalState = true">{{ some }} 원룸</h4>
-    <p>{{ prices[i] }}</p>
-    <button @Click="reportCount[i]++">허위매물신고</button>
-    <span>신고횟수 : {{ reportCount[i] }}</span>
-  </div>
+
+  <Discount></Discount>
+  <button @click="normalSort()">기본값 정렬</button>
+  <button @click="priceSort()">가격순 정렬</button>
+  <button @click="nameSort()">이름순 정렬</button>
+  <ItemList
+    @openModal="
+      modalState = true;
+      titleNum = dummydata[i].id;
+    "
+    :dummydata="dummydata[i]"
+    v-for="(el, i) in dummydata"
+    :key="el"
+  />
 </template>
 
 <script>
+import data from "./data";
+import Discount from "./Discount.vue";
+import Modal from "./Modal.vue";
+import ItemList from "./ItemList.vue";
 export default {
   name: "App",
   data() {
     return {
-      modalState: false,
-      reportCount: [0, 0, 0],
-      products: ["역삼동원룸", "천호동원룸", "마포구원룸"],
       menuNames: ["HOME", "SHOP", "ABOUT"],
-      prices: [50, 40, 70],
+      dummydata: data,
+      modalState: false,
+      titleNum: 0,
     };
   },
-
-  components: {},
+  methods: {
+    increse() {
+      // this.dummydata[i].reportCount++;
+    },
+    priceSort() {
+      this.dummydata.sort(function (a, b) {
+        return a.price - b.price;
+      });
+    },
+    normalSort() {
+      this.dummydata.sort(function (a, b) {
+        return a.id - b.id;
+      });
+    },
+    nameSort() {
+      this.dummydata.sort(function (a, b) {
+        if (a.title < b.title) return -1;
+        if (a.title > b.title) return 1;
+        return 0;
+      });
+    },
+  },
+  components: {
+    Discount: Discount,
+    Modal: Modal,
+    ItemList: ItemList,
+  },
 };
 </script>
 
@@ -62,6 +73,33 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+body {
+  margin: 0;
+}
+div {
+  box-sizing: border-box;
+}
+
+.fade-leave-from {
+  opacity: 1;
+}
+.fade-leave-active {
+  transition: all 1s;
+}
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-from {
+  transform: translateY(-1000px);
+}
+.fade-enter-active {
+  transition: all 1s;
+}
+.fade-enter-to {
+  transform: translateY(0px);
 }
 
 .menu {
@@ -78,20 +116,5 @@ export default {
 .roomImg {
   width: 100%;
   margin-top: 40px;
-}
-
-.blockBg {
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  position: fixed;
-  padding: 20px;
-}
-
-.whiteBg {
-  width: 100%;
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
 }
 </style>
